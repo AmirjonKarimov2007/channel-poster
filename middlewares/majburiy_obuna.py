@@ -28,7 +28,7 @@ class Asosiy(BaseMiddleware):
             if str(xabar.callback_query.message.chat.id).startswith('-') and xabar.callback_query.data.startswith("ovoz_add:"):
                 return
             elif str(user_id) and xabar.callback_query.data.startswith("ovoz_add:"):
-                await bot.answer_callback_query(xabar.callback_query.id, text="❌Ovoz berish uchun kanalga obuna bo'ling.")
+                pass
         else:
             return
 
