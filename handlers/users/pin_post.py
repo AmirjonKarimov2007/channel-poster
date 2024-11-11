@@ -24,10 +24,13 @@ async def check_post(post_id):
     pin_post = await db.select_post(pin=True)
     post = await db.select_post(id=int(post_id))
     check = post[0]['pin']
-    if check == True:
-        return True,''
+    if pin_post:
+        if check == True:
+            return True, ''
+        else:
+            return False, pin_post[0]['id']
     else:
-        return False,pin_post[0]['id']
+        return 'nopin',''
 
 @dp.callback_query_handler(IsSuperAdmin(),text_contains = 'post_pin:')
 async def pinposthandler(call: CallbackQuery):
@@ -39,6 +42,9 @@ async def pinposthandler(call: CallbackQuery):
     pin_post_id = check[1]
     if holat==True:
         await call.message.edit_text('❗️Post Avvaldan Pin Qilingan edi.',reply_markup=main_menu_for_super_admin)
+    elif holat=='nopin':
+        pinned_post = await db.update_post_checkbox(pin=True,id=int(post_id))
+        await call.message.edit_text('✅Post pin qilindi.',reply_markup=main_menu_for_super_admin)
     else:
         first_post_update = await db.update_post_checkbox(pin=False,id=int(pin_post_id))
         pinned_post = await db.update_post_checkbox(pin=True,id=int(post_id))
