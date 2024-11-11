@@ -1,11 +1,9 @@
 import time
 from datetime import datetime
 from aiogram.utils.exceptions import BadRequest
-from os import times
 import aiogram.utils.exceptions
 from aiogram import types
 from aiogram.types import Message,CallbackQuery
-from pyexpat.errors import messages
 from data.config import ADMINS
 from loader import dp, db,bot
 from aiogram.types import InlineKeyboardButton,InlineKeyboardMarkup
@@ -14,7 +12,7 @@ from keyboards.inline.nomzodlar_btn import nomzotlar_keyboard,posts_keyboard,pos
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin
 from keyboards.inline.nomzodlar_btn import channel_send_keybaord
 
-default_channel = '@TODAY_POSTS'
+default_channel = '@Oasis_gaming'
 
 @dp.callback_query_handler(IsSuperAdmin(),text='posts',state='*')
 async def all_posts_handler(call: types.CallbackQuery):
@@ -40,8 +38,8 @@ async def one_post_handler(call: types.CallbackQuery):
             await bot.copy_message(chat_id=call.from_user.id,from_chat_id=f"{post['channel']}",message_id=post['message_id'],reply_markup=markup)
         except BadRequest as e:
             if "Message to copy not found" in str(e):
-                # Handle the specific "Message to copy not found" error
-                await call.message.answer(text=f"<b>❌{default_channel} kanalidan bu habar topilmadi.postni o'chirib boshqattan qo'shing.</b>",reply_markup=main_menu_for_super_admin)
+                await db.delete_post_with_nomzodlar_and_votes(int(post['id']))
+                await call.message.answer(text=f"<b>❌{default_channel} kanalidan Kanalidan topilmadi va postlar ro'yxatida butunlay o'chirib tashlandi.</b>",reply_markup=main_menu_for_super_admin)
     else:
         await call.message.edit_text(f"<b>{post['title']}</b>", reply_markup=markup)
 

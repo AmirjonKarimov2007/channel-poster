@@ -10,7 +10,7 @@ from filters.admins import IsSuperAdmin
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin, back_to_main_menu, main_menu_for_admin
 from aiogram.types import Message,CallbackQuery
 import aiogram.utils.exceptions
-from states.send_chanell import SuperAdminStateCreatePost
+from states.send_chanell import SuperAdminStateCreatePost,SuperAdminStateCreateNomzod
 from aiogram.dispatcher import FSMContext
 
 @dp.callback_query_handler(IsSuperAdmin(),text='create_new_post',state='*')
@@ -35,8 +35,9 @@ async def get_to_channel_id(message: types.Message,state:FSMContext):
                     title=str(sarlavha),
                     channel=default_channel,
                     message_id=int(post_message_id.message_id),
-                    pin = False,
-                    created_date=created_date)
+                    created_date=created_date
+                )
+
                 await message.answer(text=f"✅Post {default_channel} kanaliga muvaffaqiyatli yuborildi.",
                                        reply_markup=main_menu_for_super_admin)
                 await state.finish()
@@ -65,3 +66,29 @@ async def delete_post_handler(call: CallbackQuery):
     except Exception as e:
         print(e)
         await call.message.answer("❌ Post o'chirishda xatolik yuz berdi.", reply_markup=main_menu_for_super_admin)
+
+
+#
+# @dp.callback_query_handler(IsSuperAdmin(),text_contains='nomzod_add:',state='*')
+# async def add_nomzod_to_post(call: CallbackQuery,state: FSMContext):
+#     await call.answer(cache_time=1)
+#     data = call.data.rsplit(":")
+#     post_id = data[1]
+#     await state.update_data({"post_id":post_id})
+#     try:
+#         await call.message.answer("📛Nomzod ismini yuboring.")
+#         await SuperAdminStateCreateNomzod.SUPER_ADMIN_STATE_GET_NOMZOD_NAME.set()
+#     except Exception as e:
+#         await call.message.answer(f"❌Xatolik yuz berdi:{e}")
+#
+# @dp.message_handler(IsSuperAdmin(),state=SuperAdminStateCreateNomzod.SUPER_ADMIN_STATE_GET_NOMZOD_NAME,content_types=types.ContentTypes.TEXT)
+# async def add_nomzod_name(message: types.Message,state: FSMContext):
+#     data = await state.get_data()
+#     post_id = data.get('post_id')
+#     if message.text:
+#         try:
+#             await db.add_nomzot(fullname=message.text,posts_id=int(post_id))
+#             await message.answer("✅Nomzod muvaffaqiyatli qo'shildi",reply_markup=main_menu_for_super_admin)
+#         except Exception as e:
+#             print(e)
+#             await message.answer("❌Nomzod qo'shilmadi. Iltimos Xabar Text turdagi ekaniga ishonch hosil qiling.")

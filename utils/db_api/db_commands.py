@@ -276,15 +276,15 @@ class Database:
 
 # Post uchun Handlerlar
 
-    async def add_post(self, title, channel, message_id,pin=False, created_date=None, nomzodlar=None, end_date=None):
+    async def add_post(self, title, channel, message_id, created_date=None, nomzodlar=None, end_date=None, pin=False):
         if not created_date:
             created_date = datetime.now()
         sql = """
-            INSERT INTO users_post (title, channel, message_id,pin, created_date, end_date)
-            VALUES ($1, $2, $3, $4, $5,$6)
+            INSERT INTO users_post (title, channel, message_id, created_date, end_date, pin)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
         """
-        return await self.execute(sql, title, channel, message_id,pin, created_date, end_date, fetchrow=True)
+        return await self.execute(sql, title, channel, message_id, created_date, end_date, pin, fetchrow=True)
 
     async def delete_post_with_nomzodlar_and_votes(self, post_id):
         try:
@@ -309,15 +309,16 @@ class Database:
             return None
 
 # Pin postdagi db funksiyalar
-    async def add_post(self, title, channel, message_id, created_date=None, nomzodlar=None, end_date=None):
+    async def add_post(self, title, channel, message_id, pin=False, created_date=None, nomzodlar=None, end_date=None):
         if not created_date:
             created_date = datetime.now()
         sql = """
-            INSERT INTO users_post (title, channel, message_id, created_date, end_date)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO users_post (title, channel, message_id, pin, created_date, end_date)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
         """
-        return await self.execute(sql, title, channel, message_id, created_date, end_date, fetchrow=True)
+        return await self.execute(sql, title, channel, message_id, pin, created_date, end_date, fetchrow=True)
+
     async def update_post_checkbox(self, pin, id):
         sql = "UPDATE users_Post SET pin=$1 WHERE id=$2"
         return await self.execute(sql, pin, id, execute=True)

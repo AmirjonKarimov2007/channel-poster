@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery
 from filters import IsUser, IsSuperAdmin, IsGuest
 from filters.admins import IsAdmin
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin, main_menu_for_admin
+from keyboards.inline.nomzodlar_btn import channel_send_keybaord
 from loader import db,dp,bot
 import asyncpg
 logging.basicConfig(level=logging.INFO)
@@ -44,7 +45,14 @@ async def bot_start(message: types.Message):
     if 2 == len(message.text.split(' ')) > 0:
         return await idsave(message, message.text.split(' ')[1])
     user_id = message.from_user.first_name
-    await message.reply(f"<b>👋🏻 Assalomu Aleykum {user_id} botimizga Xush kelipsiz!</b>")
+    pin_post = await db.select_post(pin=True)
+    if pin_post:
+        post_data = await db.select_post_nomzodlar(int(pin_post[0]['id']))
+        markup = await channel_send_keybaord(post_data)
+        msg = await bot.copy_message(chat_id=message.from_user.id, from_chat_id=str(post_data[0]['channel']),
+                                     message_id=int(post_data[0]['message_id']), reply_markup=markup)
+    else:
+        await message.reply(f"<b>👋🏻 Assalomu Aleykum {user_id} botimizga Xush kelipsiz!</b>")
 
 @dp.message_handler(IsUser(), CommandStart(), state="*")
 async def bot_start(message: types.Message):
@@ -60,8 +68,25 @@ async def bot_start(message: types.Message):
     if 2 == len(message.text.split(' ')) > 0:
         return await idsave(message, message.text.split(' ')[1])
     user_id = message.from_user.first_name
-    await message.reply(f"<b>👋🏻 Assalomu Aleykum {user_id} botimizga Xush kelipsiz!</b>")
-
+    pin_post = await db.select_post(pin=True)
+    if pin_post:
+        post_data = await db.select_post_nomzodlar(int(pin_post[0]['id']))
+        markup = await channel_send_keybaord(post_data)
+        msg = await bot.copy_message(chat_id=message.from_user.id, from_chat_id=str(post_data[0]['channel']),
+                                     message_id=int(post_data[0]['message_id']), reply_markup=markup)
+    else:
+        await message.reply(f"<b>👋🏻 Assalomu Aleykum {user_id} botimizga Xush kelipsiz!</b>")
+@dp.message_handler(IsUser())
+async def pin_message(message: types.Message):
+    user_id = message.from_user.first_name
+    pin_post = await db.select_post(pin=True)
+    if pin_post:
+        post_data = await db.select_post_nomzodlar(int(pin_post[0]['id']))
+        markup = await channel_send_keybaord(post_data)
+        msg = await bot.copy_message(chat_id=message.from_user.id, from_chat_id=str(post_data[0]['channel']),
+                                     message_id=int(post_data[0]['message_id']), reply_markup=markup)
+    else:
+        await message.reply(f"<b>👋🏻 Assalomu Aleykum {user_id} botimizga Xush kelipsiz!</b>")
 async def idsave(message: types.Message, text=None):
     try:
         argument = message.get_args()

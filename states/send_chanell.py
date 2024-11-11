@@ -12,3 +12,5 @@ class SuperAdminStateChannel(StatesGroup):
 class SuperAdminStateCreatePost(StatesGroup):
     SUPER_ADMIN_STATE_GET_POST_NAME = State()
     SUPER_ADMIN_STATE_GET_POST_MESSAGE_ID = State()
+class SuperAdminStateCreateNomzod(StatesGroup):
+    SUPER_ADMIN_STATE_GET_NOMZOD_NAME = State()

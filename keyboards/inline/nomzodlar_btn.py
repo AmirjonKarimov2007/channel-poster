@@ -40,16 +40,15 @@ from datetime import datetime
 async def post_keyboard(post_info, user_id):
     post = InlineKeyboardMarkup(row_width=2)
 
-
     if post_info and post_info[0].get('nomzod_id'):
         sorted_post_info = sorted(post_info, key=lambda x: x['ovozlar'], reverse=True)
         for idx, nomzod in enumerate(sorted_post_info):
             if idx == 0:
-                medal = "🥇"  # Birinchi o'rin
+                medal = "🥇"
             elif idx == 1:
-                medal = "🥈"  # Ikkinchi o'rin
+                medal = "🥈"
             elif idx == 2:
-                medal = "🥉"  # Uchinch o'rin
+                medal = "🥉"
             else:
                 medal = ""
             post.add(InlineKeyboardButton(text=f"{medal} {nomzod['fullname'].title()} || {nomzod['ovozlar']}",
@@ -57,9 +56,9 @@ async def post_keyboard(post_info, user_id):
 
         if user_id in ADMINS:
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
-            post.insert(
-                InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://9ecb-213-230-92-186.ngrok-free.app/admin/users/post/{post_info[0]['id']}/change/")))
+            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://9ecb-213-230-92-186.ngrok-free.app/admin/users/post/{post_info[0]['id']}/change/")))
             post.add(InlineKeyboardButton(text="🗑 O'chirish", callback_data=f"post_delete:{post_info[0]['id']}"))
+            # post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_post_menu"))
             return post
         else:
@@ -69,6 +68,7 @@ async def post_keyboard(post_info, user_id):
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
             post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://9ecb-213-230-92-186.ngrok-free.app/admin/users/post/{post_info[0]['id']}/change/")))
             post.add(InlineKeyboardButton(text="🗑 O'chirish", callback_data=f"post_delete:{post_info[0]['id']}"))
+            # post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_post_menu"))
             return post
         else:
