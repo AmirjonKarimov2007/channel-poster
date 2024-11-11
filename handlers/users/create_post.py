@@ -35,6 +35,7 @@ async def get_to_channel_id(message: types.Message,state:FSMContext):
                     title=str(sarlavha),
                     channel=default_channel,
                     message_id=int(post_message_id.message_id),
+                    pin = False,
                     created_date=created_date)
                 await message.answer(text=f"✅Post {default_channel} kanaliga muvaffaqiyatli yuborildi.",
                                        reply_markup=main_menu_for_super_admin)

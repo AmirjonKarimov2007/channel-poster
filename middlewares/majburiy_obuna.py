@@ -31,7 +31,6 @@ class Asosiy(BaseMiddleware):
                 pass
         else:
             return
-
         matn = "<b>🤖 Botdan Foydalanish uchun kanallarga a'zo bo'lib. \n\n\"✅ Tekshirish\" tugmasini bosing!</b>"
         royxat = []
         dastlabki = True

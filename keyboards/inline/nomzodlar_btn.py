@@ -17,6 +17,22 @@ async def posts_keyboard():
 
     return posts
 
+async def pin_posts_keyboard():
+    posts_list = await db.select_all_posts()
+
+    posts = InlineKeyboardMarkup(row_width=1)
+    for post in posts_list:
+        check = post['pin']
+        if check:
+            posts.insert(
+                InlineKeyboardButton(text=f"📌 {post['title'].title()}", callback_data=f"post_pin:{post['id']}"))
+        else:
+            posts.insert(InlineKeyboardButton(text=f"{post['title'].title()}", callback_data=f"post_pin:{post['id']}"))
+
+    posts.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_main_menu"))
+    return posts
+
+
 from aiogram import types
 from datetime import datetime
 
