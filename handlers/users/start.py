@@ -87,6 +87,7 @@ async def pin_message(message: types.Message):
                                      message_id=int(post_data[0]['message_id']), reply_markup=markup)
     else:
         await message.reply(f"<b>👋🏻 Assalomu Aleykum {user_id} botimizga Xush kelipsiz!</b>")
+
 async def idsave(message: types.Message, text=None):
     try:
         argument = message.get_args()
