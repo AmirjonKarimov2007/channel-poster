@@ -12,7 +12,7 @@ from keyboards.inline.nomzodlar_btn import nomzotlar_keyboard,posts_keyboard,pos
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin
 from keyboards.inline.nomzodlar_btn import channel_send_keybaord
 
-default_channel = '@Oasis_gaming'
+default_channel = '@TODAY_POSTS'
 
 @dp.callback_query_handler(IsSuperAdmin(),text='posts',state='*')
 async def all_posts_handler(call: types.CallbackQuery):
