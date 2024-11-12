@@ -56,7 +56,7 @@ async def post_keyboard(post_info, user_id):
 
         if user_id in ADMINS:
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
-            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://9ecb-213-230-92-186.ngrok-free.app/admin/users/post/{post_info[0]['id']}/change/")))
+            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://channel-post-django.vercel.app/admin/users/post/{post_info[0]['id']}/change/")))
             post.add(InlineKeyboardButton(text="🗑 O'chirish", callback_data=f"post_delete:{post_info[0]['id']}"))
             # post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_post_menu"))
@@ -66,7 +66,7 @@ async def post_keyboard(post_info, user_id):
     else:
         if user_id in ADMINS:
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
-            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://9ecb-213-230-92-186.ngrok-free.app/admin/users/post/{post_info[0]['id']}/change/")))
+            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://channel-post-django.vercel.app/admin/users/post/{post_info[0]['id']}/change/")))
             post.add(InlineKeyboardButton(text="🗑 O'chirish", callback_data=f"post_delete:{post_info[0]['id']}"))
             # post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_post_menu"))
