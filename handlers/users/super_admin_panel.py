@@ -8,7 +8,6 @@ from filters import IsSuperAdmin
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin, back_to_main_menu
 from loader import dp, db, bot
 from states.admin_state import SuperAdminState
-from middlewares.MediaGroup import AlbumMiddleware
 # ADMIN TAYORLASH VA CHIQARISH QISMI UCHUN
 @dp.callback_query_handler(IsSuperAdmin(), text="add_admin", state="*")
 async def add_admin(call: types.CallbackQuery):
