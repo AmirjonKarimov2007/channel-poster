@@ -1,3 +1,5 @@
+import pytz
+from datetime import datetime
 import asyncpg
 from asyncpg import Connection, Record
 from asyncpg.pool import Pool
@@ -49,8 +51,17 @@ class Database:
         ])
         return sql, tuple(parameters.values())
 
-    async def stat(self):
-        return await self.execute(f"SELECT COUNT(*) FROM users_user;", fetchval=True)
+    async def stat(self, timeframe="daily"):
+        if timeframe == "daily":
+            sql = "SELECT COUNT(*) FROM users_user WHERE created_date >= CURRENT_DATE"
+        elif timeframe == "weekly":
+            sql = "SELECT COUNT(*) FROM users_user WHERE created_date >= CURRENT_DATE - INTERVAL '7 days'"
+        elif timeframe == "monthly":
+            sql = "SELECT COUNT(*) FROM users_user WHERE created_date >= DATE_TRUNC('month', CURRENT_DATE)"
+        else:
+            sql = "SELECT COUNT(*) FROM users_user"
+        result = await self.execute(sql, fetchval=True)
+        return result
 
     async def add_admin(self, user_id: str, full_name: str):
         sql = """
@@ -66,13 +77,27 @@ class Database:
         parameters = tuple(int(param) if param == 'user_id' else param for param in parameters)
 
         return await self.execute(sql, *parameters, fetch=True)
+
     async def add_user(self, name, username, user_id):
+        # Uzbekistan time zone
+        uzbekistan_tz = pytz.timezone('Asia/Tashkent')
+
+        # Current time in Uzbekistan time zone
+        current_time = datetime.now(uzbekistan_tz)
+
+        # Bot foydalanuvchilarni kiritishni cheklash
+        if username and (username[-3:].lower() == "bot"):
+            return None
+
         sql = """
-            INSERT INTO users_user (name, username, user_id)
-            VALUES($1, $2, $3)
+            INSERT INTO users_user (
+                name, username, user_id, created_date, updated_date
+            )
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *
         """
-        return await self.execute(sql, name, username, user_id, fetchrow=True)
+        # Ma'lumotlarni bazaga qo‘shish
+        return await self.execute(sql, name, username, user_id, current_time, current_time, fetchrow=True)
 
 
     async def is_admin(self, **kwargs):

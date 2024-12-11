@@ -63,6 +63,7 @@ async def post_keyboard(post_info, user_id):
             return post
         else:
             return post
+
     else:
         if user_id in ADMINS:
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
