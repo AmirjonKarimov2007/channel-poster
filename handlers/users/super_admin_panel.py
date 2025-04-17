@@ -184,21 +184,24 @@ import datetime
 
 @dp.callback_query_handler(IsSuperAdmin(), text="statistics")
 async def stat(call: types.CallbackQuery):
+    await call.answer(cache_time=1)
     uzbekistan_tz = pytz.timezone('Asia/Tashkent')
     datas = datetime.datetime.now(uzbekistan_tz)
-    yil_oy_kun = datas.date()
-    soat_minut_sekund = f"{datas.hour}:{datas.minute}:{datas.second}"
+    yil_oy_kun = datas.date() 
+    soat_minut_sekund = f"{datas.hour}:{datas.minute}:{datas.second}" 
 
-    daily_stat = await db.stat(timeframe="daily")
-    weekly_stat = await db.stat(timeframe="weekly")
-    monthly_stat = await db.stat(timeframe="monthly")
+    daily_stat = await db.stat(timeframe="daily")  
+    weekly_stat = await db.stat(timeframe="weekly") 
+    monthly_stat = await db.stat(timeframe="monthly") 
+    all_stat = await db.stat(timeframe="all") 
 
     stat_message = f"<b>👥 Bot foydalanuvchilari soni:</b>\n"
-    stat_message += f"<b>📅 Kunlik: {daily_stat} nafar</b>\n"
+    stat_message += f"<b>🗓 Kunlik: {daily_stat} nafar</b>\n"
     stat_message += f"<b>📆 Haftalik: {weekly_stat} nafar</b>\n"
-    stat_message += f"<b>📅 Oylik: {monthly_stat} nafar</b>\n"
+    stat_message += f"<b>📊 Oylik: {monthly_stat} nafar</b>\n"
+    stat_message += f"<b>✅ Jami: {all_stat} nafar</b>\n"
     stat_message += f"<b>⏰ Soat: {soat_minut_sekund}</b>\n"
-    stat_message += f"<b>📆 Sana: {yil_oy_kun}</b>"
+    stat_message += f"<b>🕔 Sana: {yil_oy_kun}</b>"
 
     inline_button = types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton("◀️ Orqaga", callback_data="back_to_main_menu")
