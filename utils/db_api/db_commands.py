@@ -98,6 +98,50 @@ class Database:
         """
         # Ma'lumotlarni bazaga qo‘shish
         return await self.execute(sql, name, username, user_id, current_time, current_time, fetchrow=True)
+    
+
+        
+    async def add_nomzodlar_to_post(self, post_id: int, nomzodlar_data: list[dict]):
+        try:
+            # Post mavjudligini tekshirish
+            check_post_sql = "SELECT 1 FROM users_post WHERE id = $1"
+            post_exists = await self.execute(check_post_sql, post_id, fetchval=True)
+            if not post_exists:
+                print(f"Xatolik: Post id {post_id} bazada topilmadi.")
+                return False
+
+            for nomzod in nomzodlar_data:
+                name = nomzod.get('name')
+                if not name:
+                    continue
+
+                # Nomzodni fullname, post_id va ovozlar=0 bilan qo‘shish
+                nomzod_id_sql = """
+                INSERT INTO users_nomzodlar (fullname, posts_id, ovozlar)
+                VALUES ($1, $2, $3)
+                RETURNING id
+                """
+                result = await self.execute(nomzod_id_sql, name, post_id, 0, fetchrow=True)
+                nomzod_id = result['id']
+
+                # ManyToMany jadvalga qo‘shish
+                link_sql = """
+                INSERT INTO users_post_nomzodlar (post_id, nomzodlar_id)
+                VALUES ($1, $2)
+                ON CONFLICT DO NOTHING
+                """
+                await self.execute(link_sql, post_id, nomzod_id, execute=True)
+
+            return True
+        except Exception as e:
+            print(f"Nomzodlarni postga qo‘shishda xatolik: {e}")
+            return False
+
+
+
+
+
+
 
 
     async def is_admin(self, **kwargs):

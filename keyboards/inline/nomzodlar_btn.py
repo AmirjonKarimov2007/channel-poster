@@ -56,9 +56,8 @@ async def post_keyboard(post_info, user_id):
 
         if user_id in ADMINS:
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
-            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://sorovnoma.alwaysdata.net/admin/users/post/{post_info[0]['id']}/change/")))
+            post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="🗑 O'chirish", callback_data=f"post_delete:{post_info[0]['id']}"))
-            # post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_post_menu"))
             return post
         else:
@@ -67,7 +66,7 @@ async def post_keyboard(post_info, user_id):
     else:
         if user_id in ADMINS:
             post.add(InlineKeyboardButton(text="✅ Yuborish", callback_data=f"select_type:{post_info[0]['id']}"))
-            post.insert(InlineKeyboardButton(text="📝 Tahrirlalsh", web_app=types.WebAppInfo(url=f"https://sorovnoma.alwaysdata.net/admin/users/post/{post_info[0]['id']}/change/")))
+            post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="🗑 O'chirish", callback_data=f"post_delete:{post_info[0]['id']}"))
             # post.insert(InlineKeyboardButton(text="➕ Nomzod Qo'shish", callback_data=f"nomzod_add:{post_info[0]['id']}"))
             post.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_post_menu"))
@@ -79,6 +78,7 @@ async def post_keyboard(post_info, user_id):
 async def channel_send_keybaord(post_info):
     post = InlineKeyboardMarkup(row_width=2)
     if post_info and post_info[0].get('nomzod_id'):
+        print(post_info)
         sorted_post_info = sorted(post_info, key=lambda x: x['ovozlar'], reverse=True)
         for idx, nomzod in enumerate(sorted_post_info):
             if idx == 0:

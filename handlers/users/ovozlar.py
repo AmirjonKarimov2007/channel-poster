@@ -12,7 +12,7 @@ from keyboards.inline.nomzodlar_btn import nomzotlar_keyboard,posts_keyboard,pos
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin
 from keyboards.inline.nomzodlar_btn import channel_send_keybaord
 
-default_channel = '-1002507763814'
+default_channel = '-1002463444684'
 
 @dp.callback_query_handler(IsSuperAdmin(),text='posts',state='*')
 async def all_posts_handler(call: types.CallbackQuery):
@@ -98,8 +98,8 @@ async def add_to_nomzot_vote_channel(call: types.CallbackQuery):
                                             message_id=call.message.message_id,
                                             reply_markup=markup)
 
-                            except:
-                                await bot.send_message(chat_id=5955950834,text='botda xatolik yuz berdi.')
+                            except Exception as e:
+                                await bot.send_message(chat_id=5955950834,text=f'botda xatolik yuz berdi.{e}')
                         except:
                             print('ovozlar.pyning add_to_nomzot_vote funksiyasida xatolik yuz berdi. ')
                 else:
@@ -122,8 +122,8 @@ async def add_to_nomzot_vote_channel(call: types.CallbackQuery):
                                                                 message_id=call.message.message_id,
                                                                 reply_markup=markup)
 
-                        except:
-                            await bot.send_message(chat_id=5955950834, text='botda xatolik yuz berdi.')
+                        except Exception as e:
+                            await bot.send_message(chat_id=5955950834, text=f'botda xatolik yuz berdi.125line{e}')
                     except:
                         print('ovozlar.pyning add_to_nomzot_vote funksiyasida xatolik yuz berdi. ')
         else:
