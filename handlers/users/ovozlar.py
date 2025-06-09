@@ -66,13 +66,12 @@ async def check_date(post_id, state="*"):
             return True
     else:
         return True
-    from collections import defaultdict
 import time
 
 from collections import defaultdict
 
 last_update_time = defaultdict(lambda: 0)
-DEBOUNCE_INTERVAL = 10  # sekund
+DEBOUNCE_INTERVAL = 10
 
 @dp.callback_query_handler(text_contains='ovoz_add:', state="*")
 async def add_to_nomzot_vote_channel(call: types.CallbackQuery):
