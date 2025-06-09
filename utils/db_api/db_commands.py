@@ -274,7 +274,37 @@ class Database:
         return await self.execute("DELETE FROM Channels WHERE channel=$1", channel, execute=True)
 
 
+# Nomzodlar uchun funksiyalar
+    async def get_votes_by_post(self, post_id):
+        """
+        Get all votes for a specific post
+        Returns list of records with telegram_id, nomzod_id, and post_id
+        """
+        sql = """
+        SELECT * FROM users_nomzot_ovozlar
+        WHERE post_id = $1
+        """
+        return await self.execute(sql, post_id, fetch=True)
+    
+    async def get_votes_by_nomzod(self, post_id: int, nomzod_id: int):
+       
+        sql = """
+        SELECT * FROM users_nomzot_ovozlar
+        WHERE post_id = $1 AND nomzod_id = $2
+        """
+        return await self.execute(sql, post_id, nomzod_id, fetch=True)
+    
+    async def select_all_nomzot_ovozlar(self):
+        sql = """
+        SELECT * FROM users_nomzot_ovozlar
+        """
+        return await self.execute(sql, fetch=True)
 
+    async def select_nomzot_ovoz(self, **kwargs):
+        sql = "SELECT * FROM users_nomzot_ovozlar WHERE "
+        sql, parameters = self.format_args(sql, kwargs)
+
+        return await self.execute(sql, *parameters, fetch=True)
 
     # Postlar bo'yicha funksiyalar
     async def select_all_posts(self):
@@ -282,6 +312,7 @@ class Database:
         SELECT * FROM users_Post
         """
         return await self.execute(sql, fetch=True)
+    
     async def select_post(self, **kwargs):
         sql = "SELECT * FROM users_Post WHERE "
         sql, parameters = self.format_args(sql, kwargs)

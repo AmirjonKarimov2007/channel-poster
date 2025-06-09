@@ -11,6 +11,8 @@ from filters.admins import IsSuperAdmin
 from keyboards.inline.nomzodlar_btn import nomzotlar_keyboard,posts_keyboard,post_keyboard
 from keyboards.inline.main_menu_super_admin import main_menu_for_super_admin
 from keyboards.inline.nomzodlar_btn import channel_send_keybaord
+import pytz
+
 
 default_channel = '-1002463444684'
 
@@ -21,6 +23,7 @@ async def all_posts_handler(call: types.CallbackQuery):
         await call.message.delete()
         await call.message.answer(text="<b>Bu yerda siz qo'shgan jami postlar ro'yxati ko'rinadi.</b>",
                                      reply_markup=markup)
+        
     else:
         await call.message.edit_text("<b>Bu yerda siz qo'shgan jami postlar ro'yxati ko'rinadi.</b>",reply_markup=markup)
 
@@ -36,6 +39,7 @@ async def one_post_handler(call: types.CallbackQuery):
         try:
             await call.message.delete()
             await bot.copy_message(chat_id=call.from_user.id,from_chat_id=f"{post['channel']}",message_id=post['message_id'],reply_markup=markup)
+            
         except BadRequest as e:
             if "Message to copy not found" in str(e):
                 await db.delete_post_with_nomzodlar_and_votes(int(post['id']))
@@ -43,7 +47,7 @@ async def one_post_handler(call: types.CallbackQuery):
     else:
         await call.message.edit_text(f"<b>{post['title']}</b>", reply_markup=markup)
 
-import pytz
+
 
 async def check_date(post_id, state="*"):
     current_date = datetime.now()
@@ -62,74 +66,96 @@ async def check_date(post_id, state="*"):
             return True
     else:
         return True
+    from collections import defaultdict
+import time
+
+from collections import defaultdict
+
+last_update_time = defaultdict(lambda: 0)
+DEBOUNCE_INTERVAL = 10  # sekund
+
 @dp.callback_query_handler(text_contains='ovoz_add:', state="*")
 async def add_to_nomzot_vote_channel(call: types.CallbackQuery):
-
-
     chat_id = call.message.chat.id
-    message_id = call.message.message_id
-    first_char = str(chat_id)[0]
-    data = call.data.rsplit(":")
-    nomzot_id = data[1]
-    nomzot_list = await db.select_nomzot(id=int(nomzot_id))
-    check_time = await check_date(int(nomzot_list[0]['posts_id']))
     telegram_id = call.from_user.id
-    if check_time==True:
-        if nomzot_list:
-            nomzot = nomzot_list[0]
-            jami_ovozlar = await db.select_all_votes(post_id=int(nomzot['posts_id']))
-            user_voted = any(user['telegram_id'] == telegram_id for user in jami_ovozlar)
+    data = call.data.rsplit(":")
+    nomzot_id = int(data[1])
 
-            if first_char == '-':
-                chat_member = await bot.get_chat_member(f"@{call.message.chat.username}", call.from_user.id)
-                if chat_member.status in ['member', 'administrator', 'creator']:
-                    if user_voted:
-                        await bot.answer_callback_query(call.id, text="Siz allaqachon ovoz berdingiz!",show_alert=True)
-                    else:
-                        try:
-                            try:
-                                    await db.add_vote(int(telegram_id), int(nomzot_id), int(nomzot['posts_id']))
-                                    new_vote_count = nomzot['ovozlar'] + 1
-                                    await db.update_nomzot_vote(int(new_vote_count), int(nomzot_id))
-                                    post_data = await db.select_post_nomzodlar(int(nomzot['posts_id']))
-                                    markup = await channel_send_keybaord(post_data)
-                                    await bot.answer_callback_query(call.id, text="Ovozingiz qabul qilindi!", show_alert=True)
-                                    await bot.edit_message_reply_markup(chat_id=call.message.chat.id,
-                                            message_id=call.message.message_id,
-                                            reply_markup=markup)
+    nomzot_list = await db.select_nomzot(id=nomzot_id)
+    if not nomzot_list:
+        await call.message.answer("Nomzot topilmadi.", reply_markup=main_menu_for_super_admin)
+        return
 
-                            except Exception as e:
-                                await bot.send_message(chat_id=5955950834,text=f'botda xatolik yuz berdi.{e}')
-                        except:
-                            print('ovozlar.pyning add_to_nomzot_vote funksiyasida xatolik yuz berdi. ')
-                else:
-                    await bot.answer_callback_query(call.id, text="❌Ovoz berish uchun kanalga obuna bo'ling.", show_alert=True)
-            # admin  uchun
-            else:
-                if user_voted:
-                    await bot.answer_callback_query(call.id, text="Siz allaqachon ovoz berdingiz!", show_alert=True)
-                else:
-                    try:
-                        try:
+    nomzot = nomzot_list[0]
 
-                            await db.add_vote(int(telegram_id), int(nomzot_id), int(nomzot['posts_id']))
-                            new_vote_count = nomzot['ovozlar'] + 1
-                            await db.update_nomzot_vote(int(new_vote_count), int(nomzot_id))
-                            post_data = await db.select_post_nomzodlar(int(nomzot['posts_id']))
-                            markup = await post_keyboard(post_data,user_id=call.from_user.id)
-                            await bot.answer_callback_query(call.id, text="Ovozingiz qabul qilindi!", show_alert=True)
-                            await bot.edit_message_reply_markup(chat_id=call.message.chat.id,
-                                                                message_id=call.message.message_id,
-                                                                reply_markup=markup)
-
-                        except Exception as e:
-                            await bot.send_message(chat_id=5955950834, text=f'botda xatolik yuz berdi.125line{e}')
-                    except:
-                        print('ovozlar.pyning add_to_nomzot_vote funksiyasida xatolik yuz berdi. ')
-        else:
-            await call.message.answer("Nomzot topilmadi.", reply_markup=main_menu_for_super_admin)
-    elif check_time==False:
+    if not await check_date(nomzot['posts_id']):
         await bot.answer_callback_query(call.id, text="Ovoz berish vaqti tugagan!", show_alert=True)
+        return
+
+    jami_ovozlar = await db.select_all_votes(post_id=nomzot['posts_id']) or []
+    user_voted = any(user['telegram_id'] == telegram_id for user in jami_ovozlar)
+    if user_voted:
+        if str(call.from_user.id) in ADMINS:
+            post_id = nomzot['posts_id']
+            post_data = await db.select_post_nomzodlar(post_id)
+            if chat_id < 0:
+                new_markup = await channel_send_keybaord(post_data)
+            else:
+                new_markup = await post_keyboard(post_data, user_id=telegram_id)
+            now = time.time()
+            # Debounce va markup o'zgarish tekshiruvi
+            if now - last_update_time[post_id] > DEBOUNCE_INTERVAL:
+                old_markup = call.message.reply_markup
+                if str(old_markup) != str(new_markup):
+                    await bot.edit_message_reply_markup(
+                        chat_id=chat_id,
+                        message_id=call.message.message_id,
+                        reply_markup=new_markup
+                    )
+                    last_update_time[post_id] = now
+        
+        await bot.answer_callback_query(call.id, text="Siz allaqachon ovoz berdingiz!", show_alert=True)
+        return
+
+    # Kanalda ovoz berayotgan bo‘lsa, obuna tekshiruvi
+    if chat_id < 0:
+        try:
+            chat_member = await bot.get_chat_member(f"@{call.message.chat.username}", telegram_id)
+            if chat_member.status not in ['member', 'administrator', 'creator']:
+                await bot.answer_callback_query(call.id, text="❌Ovoz berish uchun kanalga obuna bo'ling.", show_alert=True)
+                return
+        except Exception as e:
+            await bot.send_message(5955950834, f"Kanal a'zolik tekshiruvida xatolik: {e}")
+            return
+
+    try:
+        await db.add_vote(telegram_id, nomzot_id, nomzot['posts_id'])
+        post_id = nomzot['posts_id']
+
+        # Yangi markup tayyorlash
+        post_data = await db.select_post_nomzodlar(post_id)
+        if chat_id < 0:
+            new_markup = await channel_send_keybaord(post_data)
+        else:
+            new_markup = await post_keyboard(post_data, user_id=telegram_id)
+
+        await bot.answer_callback_query(call.id, text="Ovozingiz qabul qilindi!", show_alert=True)
+
+        now = time.time()
+        # Debounce va markup o'zgarish tekshiruvi
+        if now - last_update_time[post_id] > DEBOUNCE_INTERVAL:
+            old_markup = call.message.reply_markup
+            # Markup'ni matnga aylantirib solishtiramiz
+            if str(old_markup) != str(new_markup):
+                await bot.edit_message_reply_markup(
+                    chat_id=chat_id,
+                    message_id=call.message.message_id,
+                    reply_markup=new_markup
+                )
+                last_update_time[post_id] = now
+    except Exception as e:
+        await bot.send_message(5955950834, f"Ovoz berishda xatolik yuz berdi: {e}")
+
 
 @dp.callback_query_handler(IsSuperAdmin(), text_contains='select_type:', state="*")
 async def select_advertisiment_type(call: CallbackQuery):
@@ -139,10 +165,14 @@ async def select_advertisiment_type(call: CallbackQuery):
     markup.add(InlineKeyboardButton(text='🔰Kanallarga',callback_data=f'send_channel:{data[1]}'))
     markup.insert(InlineKeyboardButton(text="👥  Foydalanuvchilarga", callback_data=f"post_send_users:{post_id}"))
     markup.add(InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"post:{post_id}"))
+
     if call.message.caption:
         await call.message.edit_caption("<b>Postni qayerga yubormoqchisiz?</b>",reply_markup=markup)
     else:
         await call.message.edit_text("<b>Postni qayerga yubormoqchisiz?</b>",reply_markup=markup)
+
+
+
 @dp.callback_query_handler(IsSuperAdmin(),text_contains='send_channel:')
 async def send_channels(call: types.CallbackQuery):
     data = call.data.rsplit(":")
